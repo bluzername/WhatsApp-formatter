@@ -1,0 +1,19 @@
+{
+  "name": "whatsapp-formatter",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <img src=\"whatsapp-format-extension/icons/icon-128.png\" alt=\"WhatsApp Format Logo\" width=\"128\" height=\"128\"> </p>",
+  "main": "test-conversion.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:61618/git/bluzername/WhatsApp-formatter"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jsdom": "^27.2.0"
+  }
+}

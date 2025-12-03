@@ -41,15 +41,20 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       function: getSelectedHTML
     });
 
+    console.log('[WhatsApp Format] Step 1 - Raw results:', results);
+
     if (!results || !results[0] || !results[0].result) {
       showNotification('Error', 'No text selected. Please select some text and try again.');
       return;
     }
 
     const html = results[0].result;
+    console.log('[WhatsApp Format] Step 2 - Extracted HTML:', html);
 
     // Step 2: Convert HTML to WhatsApp markdown
     const whatsappText = convertHTMLToWhatsApp(html);
+    console.log('[WhatsApp Format] Step 3 - Converted text:', whatsappText);
+    console.log('[WhatsApp Format] Step 3 - Converted text (escaped):', JSON.stringify(whatsappText));
 
     if (!whatsappText || whatsappText.trim() === '') {
       showNotification('Error', 'Could not convert the selection. Try selecting different text.');
@@ -63,10 +68,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       args: [whatsappText]
     });
 
+    console.log('[WhatsApp Format] Step 4 - Copy results:', copyResults);
+
     if (copyResults && copyResults[0] && copyResults[0].result === true) {
       showNotification('WhatsApp Format', 'Copied to clipboard!');
+      console.log('[WhatsApp Format] SUCCESS - Text copied to clipboard');
     } else {
       showNotification('Error', 'Failed to copy. Try again.');
+      console.error('[WhatsApp Format] FAILED - Could not copy to clipboard');
     }
 
   } catch (error) {
@@ -86,7 +95,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
  */
 function getSelectedHTML() {
   const selection = window.getSelection();
+  console.log('[WhatsApp Format] getSelectedHTML - selection:', selection);
+  console.log('[WhatsApp Format] getSelectedHTML - rangeCount:', selection?.rangeCount);
+
   if (!selection || selection.rangeCount === 0) {
+    console.log('[WhatsApp Format] getSelectedHTML - No selection found');
     return null;
   }
 
@@ -94,7 +107,10 @@ function getSelectedHTML() {
   const container = document.createElement('div');
   container.appendChild(range.cloneContents());
 
-  return container.innerHTML;
+  const html = container.innerHTML;
+  console.log('[WhatsApp Format] getSelectedHTML - extracted HTML:', html);
+
+  return html;
 }
 
 /**
@@ -104,11 +120,16 @@ function getSelectedHTML() {
  * @returns {Promise<boolean>} True if successful, false otherwise
  */
 async function copyToClipboard(text) {
+  console.log('[WhatsApp Format] copyToClipboard - received text:', text);
+  console.log('[WhatsApp Format] copyToClipboard - text length:', text?.length);
+  console.log('[WhatsApp Format] copyToClipboard - escaped:', JSON.stringify(text));
+
   try {
     await navigator.clipboard.writeText(text);
+    console.log('[WhatsApp Format] copyToClipboard - SUCCESS');
     return true;
   } catch (error) {
-    console.error('Clipboard copy failed:', error);
+    console.error('[WhatsApp Format] copyToClipboard - FAILED:', error);
     return false;
   }
 }

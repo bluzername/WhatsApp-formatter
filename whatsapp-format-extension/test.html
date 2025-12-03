@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Format Extension - Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #25D366; }
+    h2 { border-bottom: 2px solid #25D366; padding-bottom: 10px; margin-top: 40px; }
+    .test-section {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .instructions {
+      background: #e8f5e9;
+      padding: 15px;
+      border-left: 4px solid #25D366;
+      margin: 20px 0;
+    }
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    blockquote {
+      border-left: 4px solid #25D366;
+      margin: 0;
+      padding-left: 20px;
+      color: #666;
+    }
+    .debug-output {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    #clipboard-content {
+      font-family: monospace;
+      white-space: pre-wrap;
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 100px;
+    }
+    button {
+      background: #25D366;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #128C7E;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 WhatsApp Format Extension - Test Page</h1>
+
+  <div class="instructions">
+    <strong>How to test:</strong>
+    <ol>
+      <li>Select any formatted text below</li>
+      <li>Right-click → "Copy as WhatsApp Format"</li>
+      <li>Click "Read Clipboard" button to see what was copied</li>
+      <li>Paste into WhatsApp to verify formatting works</li>
+    </ol>
+    <p><strong>Debug:</strong> Open Chrome DevTools → Extensions → Service Worker to see console logs</p>
+  </div>
+
+  <div class="debug-output">
+    <h3>📋 Clipboard Content (click to refresh)</h3>
+    <button onclick="readClipboard()">Read Clipboard</button>
+    <button onclick="clearOutput()">Clear</button>
+    <div id="clipboard-content">(Click "Read Clipboard" after copying)</div>
+  </div>
+
+  <h2>Test 1: Basic Formatting</h2>
+  <div class="test-section">
+    <p>This text has <b>bold text</b> and <i>italic text</i> and <s>strikethrough</s>.</p>
+    <p>Here is some <code>inline code</code> in a sentence.</p>
+  </div>
+
+  <h2>Test 2: Strong/Em Tags</h2>
+  <div class="test-section">
+    <p>Using <strong>strong tag for bold</strong> and <em>em tag for italic</em>.</p>
+  </div>
+
+  <h2>Test 3: Bullet List</h2>
+  <div class="test-section">
+    <ul>
+      <li>First item</li>
+      <li>Second item</li>
+      <li>Third item</li>
+    </ul>
+  </div>
+
+  <h2>Test 4: Numbered List</h2>
+  <div class="test-section">
+    <ol>
+      <li>Step one</li>
+      <li>Step two</li>
+      <li>Step three</li>
+    </ol>
+  </div>
+
+  <h2>Test 5: Nested List</h2>
+  <div class="test-section">
+    <ul>
+      <li>Parent item 1
+        <ul>
+          <li>Child item 1.1</li>
+          <li>Child item 1.2</li>
+        </ul>
+      </li>
+      <li>Parent item 2</li>
+    </ul>
+  </div>
+
+  <h2>Test 6: Blockquote</h2>
+  <div class="test-section">
+    <blockquote>
+      This is a quoted text that should appear with a > prefix in WhatsApp.
+    </blockquote>
+  </div>
+
+  <h2>Test 7: Links</h2>
+  <div class="test-section">
+    <p>Check out <a href="https://www.google.com">Google</a> for more info.</p>
+    <p>Visit <a href="https://github.com">GitHub</a> for code.</p>
+  </div>
+
+  <h2>Test 8: Headings</h2>
+  <div class="test-section">
+    <h1>Heading 1</h1>
+    <h2>Heading 2</h2>
+    <h3>Heading 3</h3>
+  </div>
+
+  <h2>Test 9: Mixed Content</h2>
+  <div class="test-section">
+    <h3>Meeting Notes</h3>
+    <p><strong>Date:</strong> December 3, 2024</p>
+    <p>Key discussion points:</p>
+    <ul>
+      <li><b>Project timeline</b> - on track</li>
+      <li><i>Budget review</i> - needs attention</li>
+      <li>Next steps:
+        <ul>
+          <li>Send proposal</li>
+          <li>Schedule follow-up</li>
+        </ul>
+      </li>
+    </ul>
+    <blockquote>Action: Send final draft by Friday</blockquote>
+    <p>Reference: <a href="https://example.com/doc">Project Documentation</a></p>
+  </div>
+
+  <h2>Test 10: Simple Bold Only</h2>
+  <div class="test-section">
+    <p><b>This is just bold text</b></p>
+  </div>
+
+  <h2>Test 11: Plain Text (Control)</h2>
+  <div class="test-section">
+    <p>This is plain text with no formatting at all.</p>
+  </div>
+
+  <script>
+    async function readClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        const output = document.getElementById('clipboard-content');
+        output.textContent = text || '(clipboard is empty)';
+
+        // Also show escaped version for debugging
+        console.log('Clipboard content:', text);
+        console.log('Clipboard content (escaped):', JSON.stringify(text));
+      } catch (err) {
+        document.getElementById('clipboard-content').textContent =
+          'Error reading clipboard: ' + err.message + '\n\nMake sure you have granted clipboard permissions.';
+      }
+    }
+
+    function clearOutput() {
+      document.getElementById('clipboard-content').textContent = '(cleared)';
+    }
+
+    // Also add a paste listener for easy debugging
+    document.addEventListener('paste', (e) => {
+      const text = e.clipboardData.getData('text');
+      console.log('Pasted text:', text);
+      console.log('Pasted text (escaped):', JSON.stringify(text));
+    });
+  </script>
+</body>
+</html>
