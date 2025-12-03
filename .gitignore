@@ -1,0 +1,185 @@
+# =============================================================================
+# WhatsApp Format Extension - .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Operating System Files
+# -----------------------------------------------------------------------------
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+Icon
+
+# Windows
+*.lnk
+Desktop.ini
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# -----------------------------------------------------------------------------
+# IDE and Editor Files
+# -----------------------------------------------------------------------------
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# JetBrains (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*.swn
+*~
+.netrwhist
+tags
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Atom
+.atom/
+
+# -----------------------------------------------------------------------------
+# Node.js (for potential build tools)
+# -----------------------------------------------------------------------------
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnpm-debug.log*
+
+# Package manager lock files (uncomment if not needed)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# -----------------------------------------------------------------------------
+# Build and Distribution
+# -----------------------------------------------------------------------------
+
+# Build output
+dist/
+build/
+out/
+*.zip
+*.crx
+*.pem
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# -----------------------------------------------------------------------------
+# Testing and Coverage
+# -----------------------------------------------------------------------------
+
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+
+# -----------------------------------------------------------------------------
+# Environment and Secrets
+# -----------------------------------------------------------------------------
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# API keys and secrets
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# -----------------------------------------------------------------------------
+# Logs
+# -----------------------------------------------------------------------------
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -----------------------------------------------------------------------------
+# Chrome Extension Specific
+# -----------------------------------------------------------------------------
+
+# Packed extension files (keep source, ignore packaged)
+*.crx
+*.pem
+*.zip
+
+# Chrome extension key file
+key.pem
+
+# Web store assets (large files)
+store-assets/
+screenshots/
+promotional/
+
+# -----------------------------------------------------------------------------
+# Documentation Build
+# -----------------------------------------------------------------------------
+
+docs/_build/
+site/
+.docusaurus/
+
+# -----------------------------------------------------------------------------
+# Miscellaneous
+# -----------------------------------------------------------------------------
+
+# Local development notes
+TODO.local.md
+NOTES.md
+scratch/
+.scratch/
+
+# Archive files
+*.tar
+*.tar.gz
+*.rar
+*.7z
