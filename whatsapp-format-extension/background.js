@@ -4,7 +4,7 @@
  */
 
 // Create context menu on install
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(function() {
   chrome.contextMenus.create({
     id: 'copy-whatsapp-format',
     title: 'Copy as WhatsApp Format',
@@ -13,30 +13,30 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Handle context menu click
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+chrome.contextMenus.onClicked.addListener(async function(info, tab) {
   if (info.menuItemId !== 'copy-whatsapp-format') {
     return;
   }
 
   try {
-    // Step 1: Get selected HTML
-    const results = await chrome.scripting.executeScript({
+    // Step 1: Get selected HTML by injecting a script file
+    var htmlResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: getSelectedHTML
+      files: ['get-selection.js']
     });
 
-    console.log('[WA Format] HTML results:', results);
+    console.log('[WA Format] HTML results:', htmlResults);
 
-    if (!results || !results[0] || !results[0].result) {
+    if (!htmlResults || !htmlResults[0] || !htmlResults[0].result) {
       showNotification('Error', 'No text selected.');
       return;
     }
 
-    const html = results[0].result;
+    var html = htmlResults[0].result;
     console.log('[WA Format] Extracted HTML:', html);
 
-    // Step 2: Convert to WhatsApp format
-    const whatsappText = convertHTMLToWhatsApp(html);
+    // Step 2: Convert to WhatsApp format (runs in service worker)
+    var whatsappText = convertHTMLToWhatsApp(html);
     console.log('[WA Format] Converted:', whatsappText);
 
     if (!whatsappText || whatsappText.trim() === '') {
@@ -44,16 +44,24 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       return;
     }
 
-    // Step 3: Copy to clipboard
-    const copyResults = await chrome.scripting.executeScript({
+    // Step 3: Copy to clipboard by injecting a script file
+    // We store the text in a global variable first, then inject the copy script
+    await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: copyToClipboard,
+      func: function(text) {
+        window.__whatsappFormatText = text;
+      },
       args: [whatsappText]
+    });
+
+    var copyResults = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['copy-to-clipboard.js']
     });
 
     console.log('[WA Format] Copy results:', copyResults);
 
-    const success = copyResults && copyResults[0] && copyResults[0].result === true;
+    var success = copyResults && copyResults[0] && copyResults[0].result === true;
     if (success) {
       showNotification('WhatsApp Format', 'Copied to clipboard!');
     } else {
@@ -62,49 +70,22 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   } catch (error) {
     console.error('[WA Format] Error:', error);
-    showNotification('Error', 'An error occurred.');
+    showNotification('Error', 'An error occurred: ' + error.message);
   }
 });
 
-// === INJECTED FUNCTIONS ===
-
-function getSelectedHTML() {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) {
-    return null;
-  }
-  const range = selection.getRangeAt(0);
-  const container = document.createElement('div');
-  container.appendChild(range.cloneContents());
-  console.log('[WA Format] getSelectedHTML:', container.innerHTML);
-  return container.innerHTML;
-}
-
-function copyToClipboard(text) {
-  console.log('[WA Format] copyToClipboard:', text);
-  return navigator.clipboard.writeText(text)
-    .then(() => {
-      console.log('[WA Format] Copy success');
-      return true;
-    })
-    .catch((err) => {
-      console.error('[WA Format] Copy failed:', err);
-      return false;
-    });
-}
-
-// === CONVERSION ENGINE ===
+// === CONVERSION ENGINE (runs in service worker context) ===
 
 function convertHTMLToWhatsApp(html) {
   if (!html || html.trim() === '') {
     return '';
   }
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
-  const root = doc.body.firstChild;
+  var parser = new DOMParser();
+  var doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
+  var root = doc.body.firstChild;
 
-  const result = processNode(root, 0);
+  var result = processNode(root, 0);
 
   return result
     .replace(/\n{3,}/g, '\n\n')
@@ -113,32 +94,32 @@ function convertHTMLToWhatsApp(html) {
 }
 
 function processNode(node, depth) {
-  let result = '';
+  var result = '';
 
   if (!node || !node.childNodes) {
     return result;
   }
 
-  for (let i = 0; i < node.childNodes.length; i++) {
-    const child = node.childNodes[i];
+  for (var i = 0; i < node.childNodes.length; i++) {
+    var child = node.childNodes[i];
 
     // Text node
     if (child.nodeType === 3) {
-      const text = child.textContent;
-      const normalized = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+      var text = child.textContent;
+      var normalized = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
       result += normalized;
       continue;
     }
 
     // Element node
     if (child.nodeType === 1) {
-      const tagName = child.tagName.toLowerCase();
+      var tagName = child.tagName.toLowerCase();
 
       if (tagName === 'script' || tagName === 'style' || tagName === 'noscript') {
         continue;
       }
 
-      const childContent = processNode(child, depth);
+      var childContent = processNode(child, depth);
 
       if (tagName === 'b' || tagName === 'strong') {
         if (childContent.trim()) {
@@ -169,7 +150,7 @@ function processNode(node, depth) {
       } else if (tagName === 'blockquote') {
         result += '\n' + formatBlockquote(childContent) + '\n';
       } else if (tagName === 'a') {
-        const href = child.getAttribute('href');
+        var href = child.getAttribute('href');
         if (href && href.trim() && childContent.trim()) {
           result += '[' + childContent.trim() + '](' + href.trim() + ')';
         } else {
@@ -221,24 +202,27 @@ function processNode(node, depth) {
 }
 
 function formatBulletList(listNode, depth) {
-  let result = '';
-  const indent = '  '.repeat(depth);
+  var result = '';
+  var indent = '';
+  for (var d = 0; d < depth; d++) {
+    indent += '  ';
+  }
 
-  for (let i = 0; i < listNode.children.length; i++) {
-    const child = listNode.children[i];
+  for (var i = 0; i < listNode.children.length; i++) {
+    var child = listNode.children[i];
     if (child.tagName.toLowerCase() !== 'li') {
       continue;
     }
 
-    let itemText = '';
-    let nestedListContent = '';
+    var itemText = '';
+    var nestedListContent = '';
 
-    for (let j = 0; j < child.childNodes.length; j++) {
-      const liChild = child.childNodes[j];
+    for (var j = 0; j < child.childNodes.length; j++) {
+      var liChild = child.childNodes[j];
       if (liChild.nodeType === 3) {
         itemText += liChild.textContent.replace(/\s+/g, ' ');
       } else if (liChild.nodeType === 1) {
-        const liChildTag = liChild.tagName.toLowerCase();
+        var liChildTag = liChild.tagName.toLowerCase();
         if (liChildTag === 'ul') {
           nestedListContent += formatBulletList(liChild, depth + 1);
         } else if (liChildTag === 'ol') {
@@ -249,7 +233,7 @@ function formatBulletList(listNode, depth) {
       }
     }
 
-    const trimmedText = itemText.trim();
+    var trimmedText = itemText.trim();
     if (trimmedText) {
       result += indent + '- ' + trimmedText + '\n';
     }
@@ -262,25 +246,28 @@ function formatBulletList(listNode, depth) {
 }
 
 function formatNumberedList(listNode, depth) {
-  let result = '';
-  const indent = '  '.repeat(depth);
-  let itemIndex = 1;
+  var result = '';
+  var indent = '';
+  for (var d = 0; d < depth; d++) {
+    indent += '  ';
+  }
+  var itemIndex = 1;
 
-  for (let i = 0; i < listNode.children.length; i++) {
-    const child = listNode.children[i];
+  for (var i = 0; i < listNode.children.length; i++) {
+    var child = listNode.children[i];
     if (child.tagName.toLowerCase() !== 'li') {
       continue;
     }
 
-    let itemText = '';
-    let nestedListContent = '';
+    var itemText = '';
+    var nestedListContent = '';
 
-    for (let j = 0; j < child.childNodes.length; j++) {
-      const liChild = child.childNodes[j];
+    for (var j = 0; j < child.childNodes.length; j++) {
+      var liChild = child.childNodes[j];
       if (liChild.nodeType === 3) {
         itemText += liChild.textContent.replace(/\s+/g, ' ');
       } else if (liChild.nodeType === 1) {
-        const liChildTag = liChild.tagName.toLowerCase();
+        var liChildTag = liChild.tagName.toLowerCase();
         if (liChildTag === 'ul') {
           nestedListContent += formatBulletList(liChild, depth + 1);
         } else if (liChildTag === 'ol') {
@@ -291,7 +278,7 @@ function formatNumberedList(listNode, depth) {
       }
     }
 
-    const trimmedText = itemText.trim();
+    var trimmedText = itemText.trim();
     if (trimmedText) {
       result += indent + itemIndex + '. ' + trimmedText + '\n';
       itemIndex++;
@@ -308,12 +295,15 @@ function formatBlockquote(content) {
   if (!content || !content.trim()) {
     return '';
   }
-  return content
-    .trim()
-    .split('\n')
-    .map(function(line) { return '> ' + line.trim(); })
-    .filter(function(line) { return line !== '> '; })
-    .join('\n');
+  var lines = content.trim().split('\n');
+  var result = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = '> ' + lines[i].trim();
+    if (line !== '> ') {
+      result.push(line);
+    }
+  }
+  return result.join('\n');
 }
 
 function showNotification(title, message) {
