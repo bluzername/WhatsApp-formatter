@@ -1,4 +1,4 @@
-# WhatsApp Format - Chrome Extension
+# WhatsApp Formatter - Chrome Extension
 
 A Chrome extension that converts formatted text from any webpage into WhatsApp-compatible markdown format. Preserves bold, italic, lists, blockquotes, links, and more when pasting into WhatsApp.
 
@@ -42,7 +42,7 @@ The extension will be available on the Chrome Web Store in the future.
 
 5. **Pin the extension (optional)**
    - Click the puzzle piece icon in Chrome toolbar
-   - Click the pin icon next to "WhatsApp Format"
+   - Click the pin icon next to "WhatsApp Formatter"
 
 ## Usage
 
@@ -52,7 +52,7 @@ The extension will be available on the Chrome Web Store in the future.
 
 3. **Right-click** on the selected text
 
-4. **Click** "Copy as WhatsApp Format" from the context menu
+4. **Click** "Copy as WhatsApp Formatter" from the context menu
 
 5. **Open** WhatsApp Web (web.whatsapp.com) or WhatsApp Desktop
 
@@ -165,7 +165,7 @@ This extension:
 - Does NOT collect any user data
 - Does NOT send any data to external servers
 - Does NOT track your browsing activity
-- Only accesses the clipboard when you explicitly use the "Copy as WhatsApp Format" feature
+- Only accesses the clipboard when you explicitly use the "Copy as WhatsApp Formatter" feature
 - Requires `<all_urls>` permission solely to work on any webpage you visit
 
 ## License

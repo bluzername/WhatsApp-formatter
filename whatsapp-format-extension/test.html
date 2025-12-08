@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WhatsApp Format Extension - Test Page</title>
+  <title>WhatsApp Formatter Extension - Test Page</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -77,13 +77,13 @@
   </style>
 </head>
 <body>
-  <h1>🧪 WhatsApp Format Extension - Test Page</h1>
+  <h1>🧪 WhatsApp Formatter Extension - Test Page</h1>
 
   <div class="instructions">
     <strong>How to test:</strong>
     <ol>
       <li>Select any formatted text below</li>
-      <li>Right-click → "Copy as WhatsApp Format"</li>
+      <li>Right-click → "Copy as WhatsApp Formatter"</li>
       <li>Click "Read Clipboard" button to see what was copied</li>
       <li>Paste into WhatsApp to verify formatting works</li>
     </ol>
@@ -188,7 +188,241 @@
     <p>This is plain text with no formatting at all.</p>
   </div>
 
+  <h2>🤖 Automated Tests</h2>
+  <div class="debug-output">
+    <button onclick="runAutomatedTests()">Run All Tests</button>
+    <div id="test-results" style="font-family: monospace; white-space: pre-wrap; margin-top: 15px;"></div>
+  </div>
+
+  <script src="get-selection.js"></script>
   <script>
+    // Automated test suite - tests conversion logic directly
+    function runAutomatedTests() {
+      const results = [];
+      let passed = 0;
+      let failed = 0;
+
+      // Test cases: [name, html, expected output]
+      const testCases = [
+        ['Basic bold', '<b>bold</b>', '*bold*'],
+        ['Basic italic', '<i>italic</i>', '_italic_'],
+        ['Basic strikethrough', '<s>strike</s>', '~strike~'],
+        ['Inline code', '<code>code</code>', '`code`'],
+        ['Strong tag', '<strong>strong</strong>', '*strong*'],
+        ['Em tag', '<em>emphasis</em>', '_emphasis_'],
+        ['Bullet list with ul', '<ul><li>One</li><li>Two</li></ul>', '- One\n- Two'],
+        ['Bullet list - li only', '<li>One</li><li>Two</li>', '- One\n- Two'],
+        ['Numbered list with ol', '<ol><li>One</li><li>Two</li></ol>', '1. One\n2. Two'],
+        ['Nested list', '<ul><li>Parent<ul><li>Child</li></ul></li></ul>', '- Parent\n  - Child'],
+        ['Blockquote', '<blockquote>Quote</blockquote>', '> Quote'],
+        ['Heading h1', '<h1>Title</h1>', '*Title*'],
+        ['Heading h2', '<h2>Subtitle</h2>', '*Subtitle*'],
+        ['Mixed: bold + list', '<b>Title</b><ul><li>Item</li></ul>', '*Title*\n- Item'],
+        ['Plain text', 'Just plain text', 'Just plain text'],
+        ['Paragraph', '<p>Paragraph text</p>', 'Paragraph text'],
+        ['Nested bold', '<b><strong>double bold</strong></b>', '*double bold*'],
+        ['Nested italic', '<i><em>double italic</em></i>', '_double italic_'],
+        ['Bold in numbered list', '<ol><li><b>Bold item</b></li></ol>', '1. *Bold item*'],
+      ];
+
+      for (const [name, html, expected] of testCases) {
+        const result = testConversion(html);
+        const pass = result === expected;
+        if (pass) {
+          passed++;
+          results.push(`✅ ${name}`);
+        } else {
+          failed++;
+          results.push(`❌ ${name}`);
+          results.push(`   Input:    ${JSON.stringify(html)}`);
+          results.push(`   Expected: ${JSON.stringify(expected)}`);
+          results.push(`   Got:      ${JSON.stringify(result)}`);
+        }
+      }
+
+      results.unshift(`\n=== Results: ${passed} passed, ${failed} failed ===\n`);
+      document.getElementById('test-results').textContent = results.join('\n');
+
+      console.log('Test results:', { passed, failed });
+      return { passed, failed, results };
+    }
+
+    // Convert HTML to WhatsApp format (copy of logic from get-selection.js)
+    function testConversion(html) {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
+      var root = doc.body.firstChild;
+      var result = processTestNode(root, 0);
+      return result
+        .replace(/\n{3,}/g, '\n\n')
+        .replace(/[ \t]+$/gm, '')
+        .replace(/\*\*+/g, '*')   // Collapse multiple asterisks (nested bold)
+        .replace(/__+/g, '_')     // Collapse multiple underscores (nested italic)
+        .replace(/~~+/g, '~')     // Collapse multiple tildes (nested strikethrough)
+        .trim();
+    }
+
+    function processTestNode(node, depth) {
+      var result = '';
+      if (!node || !node.childNodes) return result;
+
+      for (var i = 0; i < node.childNodes.length; i++) {
+        var child = node.childNodes[i];
+
+        if (child.nodeType === 3) {
+          var normalized = child.textContent.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+          if (normalized.trim() === '') continue;
+          result += normalized;
+          continue;
+        }
+
+        if (child.nodeType === 1) {
+          var tagName = child.tagName.toLowerCase();
+
+          if (tagName === 'script' || tagName === 'style') continue;
+
+          if (tagName === 'ul') {
+            if (result.length > 0 && !result.endsWith('\n')) result += '\n';
+            result += formatTestBulletList(child, depth);
+          } else if (tagName === 'ol') {
+            if (result.length > 0 && !result.endsWith('\n')) result += '\n';
+            result += formatTestNumberedList(child, depth);
+          } else if (tagName === 'li') {
+            var liText = '';
+            for (var j = 0; j < child.childNodes.length; j++) {
+              var liChild = child.childNodes[j];
+              if (liChild.nodeType === 3) {
+                liText += liChild.textContent.replace(/\s+/g, ' ');
+              } else if (liChild.nodeType === 1) {
+                liText += processTestNode(liChild, depth);
+              }
+            }
+            if (liText.trim()) result += '- ' + liText.trim() + '\n';
+          } else if (tagName === 'br') {
+            result += '\n';
+          } else {
+            var childContent = processTestNode(child, depth);
+            if (tagName === 'b' || tagName === 'strong') {
+              if (childContent.trim()) result += '*' + childContent.trim() + '*';
+            } else if (tagName === 'i' || tagName === 'em') {
+              if (childContent.trim()) result += '_' + childContent.trim() + '_';
+            } else if (tagName === 's' || tagName === 'strike' || tagName === 'del') {
+              if (childContent.trim()) result += '~' + childContent.trim() + '~';
+            } else if (tagName === 'code') {
+              if (childContent.trim()) result += '`' + childContent.trim() + '`';
+            } else if (tagName === 'blockquote') {
+              if (childContent.trim()) result += '\n> ' + childContent.trim() + '\n';
+            } else if (tagName === 'p') {
+              if (childContent.trim()) result += childContent.trim() + '\n\n';
+            } else if (tagName === 'div') {
+              if (childContent.trim()) result += childContent.trim() + '\n';
+            } else if (/^h[1-6]$/.test(tagName)) {
+              if (childContent.trim()) result += '*' + childContent.trim() + '*\n\n';
+            } else {
+              result += childContent;
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    function formatTestBulletList(listNode, depth) {
+      var result = '';
+      var indent = '';
+      for (var d = 0; d < depth; d++) indent += '  ';
+
+      for (var i = 0; i < listNode.children.length; i++) {
+        var child = listNode.children[i];
+        if (child.tagName.toLowerCase() !== 'li') continue;
+
+        var itemText = '';
+        var nestedContent = '';
+
+        for (var j = 0; j < child.childNodes.length; j++) {
+          var liChild = child.childNodes[j];
+          if (liChild.nodeType === 3) {
+            itemText += liChild.textContent.replace(/\s+/g, ' ');
+          } else if (liChild.nodeType === 1) {
+            var tag = liChild.tagName.toLowerCase();
+            if (tag === 'ul') {
+              nestedContent += formatTestBulletList(liChild, depth + 1);
+            } else if (tag === 'ol') {
+              nestedContent += formatTestNumberedList(liChild, depth + 1);
+            } else {
+              // Handle inline formatting tags directly
+              var liChildText = liChild.textContent.replace(/\s+/g, ' ');
+              if (tag === 'b' || tag === 'strong') {
+                if (liChildText.trim()) itemText += '*' + liChildText.trim() + '*';
+              } else if (tag === 'i' || tag === 'em') {
+                if (liChildText.trim()) itemText += '_' + liChildText.trim() + '_';
+              } else if (tag === 's' || tag === 'strike' || tag === 'del') {
+                if (liChildText.trim()) itemText += '~' + liChildText.trim() + '~';
+              } else if (tag === 'code') {
+                if (liChildText.trim()) itemText += '`' + liChildText.trim() + '`';
+              } else {
+                itemText += processTestNode(liChild, depth + 1);
+              }
+            }
+          }
+        }
+
+        if (itemText.trim()) result += indent + '- ' + itemText.trim() + '\n';
+        if (nestedContent) result += nestedContent;
+      }
+      return result;
+    }
+
+    function formatTestNumberedList(listNode, depth) {
+      var result = '';
+      var indent = '';
+      for (var d = 0; d < depth; d++) indent += '  ';
+      var idx = 1;
+
+      for (var i = 0; i < listNode.children.length; i++) {
+        var child = listNode.children[i];
+        if (child.tagName.toLowerCase() !== 'li') continue;
+
+        var itemText = '';
+        var nestedContent = '';
+
+        for (var j = 0; j < child.childNodes.length; j++) {
+          var liChild = child.childNodes[j];
+          if (liChild.nodeType === 3) {
+            itemText += liChild.textContent.replace(/\s+/g, ' ');
+          } else if (liChild.nodeType === 1) {
+            var tag = liChild.tagName.toLowerCase();
+            if (tag === 'ul') {
+              nestedContent += formatTestBulletList(liChild, depth + 1);
+            } else if (tag === 'ol') {
+              nestedContent += formatTestNumberedList(liChild, depth + 1);
+            } else {
+              // Handle inline formatting tags directly
+              var liChildText = liChild.textContent.replace(/\s+/g, ' ');
+              if (tag === 'b' || tag === 'strong') {
+                if (liChildText.trim()) itemText += '*' + liChildText.trim() + '*';
+              } else if (tag === 'i' || tag === 'em') {
+                if (liChildText.trim()) itemText += '_' + liChildText.trim() + '_';
+              } else if (tag === 's' || tag === 'strike' || tag === 'del') {
+                if (liChildText.trim()) itemText += '~' + liChildText.trim() + '~';
+              } else if (tag === 'code') {
+                if (liChildText.trim()) itemText += '`' + liChildText.trim() + '`';
+              } else {
+                itemText += processTestNode(liChild, depth + 1);
+              }
+            }
+          }
+        }
+
+        if (itemText.trim()) {
+          result += indent + idx + '. ' + itemText.trim() + '\n';
+          idx++;
+        }
+        if (nestedContent) result += nestedContent;
+      }
+      return result;
+    }
+
     async function readClipboard() {
       try {
         const text = await navigator.clipboard.readText();

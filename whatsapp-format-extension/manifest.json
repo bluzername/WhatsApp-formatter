@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "WhatsApp Format",
-  "version": "1.0.0",
+  "name": "WhatsApp Formatter",
+  "version": "1.0.2",
   "description": "Copy formatted text to WhatsApp - preserves bold, italic, lists, and more",
-  "permissions": ["contextMenus", "scripting", "notifications", "storage"],
-  "host_permissions": ["<all_urls>"],
+  "minimum_chrome_version": "109",
+  "permissions": ["contextMenus", "scripting", "notifications", "clipboardWrite", "offscreen", "activeTab"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "WhatsApp Format - Right-click to copy",
+    "default_title": "WhatsApp Formatter - Right-click to copy",
     "default_icon": {
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",

@@ -5,16 +5,16 @@
 (function() {
   var text = window.__whatsappFormatText;
   if (!text) {
-    console.error('[WA Format] No text to copy');
+    console.error('[WA Formatter] No text to copy');
     return false;
   }
 
   return navigator.clipboard.writeText(text).then(function() {
-    console.log('[WA Format] Copy success');
+    console.log('[WA Formatter] Copy success');
     delete window.__whatsappFormatText;
     return true;
   }).catch(function(err) {
-    console.error('[WA Format] Clipboard write failed:', err);
+    console.error('[WA Formatter] Clipboard write failed:', err);
     return false;
   });
 })();

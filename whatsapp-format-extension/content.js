@@ -1,5 +1,5 @@
 /**
- * WhatsApp Format - Content Script
+ * WhatsApp Formatter - Content Script
  *
  * This is a minimal content script included for compatibility.
  * The main functionality is handled by the background service worker
@@ -10,7 +10,7 @@
  * - Visual feedback overlays
  * - Format preview tooltips
  *
- * @author WhatsApp Format Extension
+ * @author WhatsApp Formatter Extension
  * @version 1.0.0
  */
 
