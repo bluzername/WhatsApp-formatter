@@ -7,12 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Conversion logic lives in one place, `converter.js`, injected into the page ahead of `get-selection.js` and `require()`d by the tests.
+- Whitespace between inline elements is preserved (`<b>a</b> <i>b</i>` now yields `*a* _b_`).
+- `package.json` cleaned up (name, description, repository URL, MIT license, version 1.0.2).
+- `npm test` runs a `node:test` suite (33 cases); `npm run lint` checks syntax, manifest and version agreement; `npm run package` builds a zip.
+- CI workflow and Dependabot added.
+
+### Removed
+- `test-conversion.js` (a diverged copy of the converter), the unused `content.js` and `copy-to-clipboard.js`, and the duplicate extension README.
+
 ### Planned
 - Chrome Web Store publication
 - Keyboard shortcut support (Cmd/Ctrl+Shift+W)
 - Options page for customization
-- Format preview tooltip
-- Dark mode support
+
+---
+
+## [1.0.2] - 2025-12-08
+
+### Changed
+- Renamed to "WhatsApp Formatter" throughout.
+- Clipboard writes go through an offscreen document; `minimum_chrome_version` set to 109.
+- `activeTab` permission replaces broad host permissions.
+- HTML conversion runs in page context (fixes the missing `DOMParser` in the service worker).
+
+### Fixed
+- Standalone `<li>`, nested lists, whitespace handling, nested bold/italic collapsing, formatting inside list items.
+- `chrome.runtime.getContexts` guarded for Chrome 109-115; "document already exists" handled.
+
+## [1.0.1] - 2025-12-04
+
+### Fixed
+- Service worker could not access the page DOM; selection and clipboard code moved to injected files.
+- `chrome.scripting.executeScript` called with `func` instead of `function`.
 
 ---
 
@@ -67,6 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| 1.0.2 | 2025-12-08 | Offscreen clipboard, activeTab, list and nesting fixes |
+| 1.0.1 | 2025-12-04 | Page-context injection fixes |
 | 1.0.0 | 2024-12-03 | Initial release with full formatting support |
 
 ---
@@ -90,5 +120,7 @@ No data migration needed — the extension is stateless.
 - [Report Issues](https://github.com/bluzername/WhatsApp-formatter/issues)
 - [Contributing Guide](CONTRIBUTING.md)
 
-[Unreleased]: https://github.com/bluzername/WhatsApp-formatter/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/bluzername/WhatsApp-formatter/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/bluzername/WhatsApp-formatter/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/bluzername/WhatsApp-formatter/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/bluzername/WhatsApp-formatter/releases/tag/v1.0.0

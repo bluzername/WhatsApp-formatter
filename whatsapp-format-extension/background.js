@@ -19,10 +19,11 @@ chrome.contextMenus.onClicked.addListener(async function(info, tab) {
   }
 
   try {
-    // Step 1: Get selected HTML and convert to WhatsApp format (in page context)
+    // Step 1: Get selected HTML and convert to WhatsApp format (in page context).
+    // converter.js registers globalThis.WhatsAppConverter; get-selection.js uses it.
     var results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ['get-selection.js']
+      files: ['converter.js', 'get-selection.js']
     });
 
     console.log('[WA Formatter] Conversion results:', results);

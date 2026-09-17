@@ -1,18 +1,18 @@
 {
   "name": "whatsapp-formatter",
-  "version": "1.0.0",
-  "description": "<p align=\"center\">   <img src=\"whatsapp-format-extension/icons/icon-128.png\" alt=\"WhatsApp Format Logo\" width=\"128\" height=\"128\"> </p>",
-  "main": "test-conversion.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "version": "1.0.2",
+  "description": "Chrome extension that copies rich text from any webpage as WhatsApp-ready formatting",
+  "private": true,
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "http://local_proxy@127.0.0.1:61618/git/bluzername/WhatsApp-formatter"
+    "url": "https://github.com/bluzername/WhatsApp-formatter.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "lint": "node scripts/lint.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "package": "node scripts/package.js"
+  },
   "devDependencies": {
     "jsdom": "^27.2.0"
   }
