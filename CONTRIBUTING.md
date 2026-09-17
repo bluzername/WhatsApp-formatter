@@ -75,10 +75,14 @@ Look for issues labeled `good first issue` — these are great for newcomers!
 
 ```
 whatsapp-format-extension/
-├── manifest.json      # Extension configuration
-├── background.js      # Service worker (main logic)
-├── content.js         # Content script (minimal)
-└── icons/            # Extension icons
+  manifest.json      Extension configuration
+  background.js      Service worker: context menu, script injection, clipboard
+  converter.js       HTML-to-WhatsApp conversion engine (shared with tests)
+  get-selection.js   Injected into the page; serialises the selection
+  offscreen.html/js  Offscreen document that writes to the clipboard
+  icons/             Extension icons
+test/                node:test suite for converter.js
+scripts/             lint and package helpers
 ```
 
 ### Key Files
@@ -86,17 +90,21 @@ whatsapp-format-extension/
 | File | Purpose |
 |------|---------|
 | `manifest.json` | Defines permissions, scripts, and metadata |
-| `background.js` | Contains the HTML-to-WhatsApp conversion engine |
-| `content.js` | Placeholder for future content script features |
+| `converter.js` | The HTML-to-WhatsApp conversion engine; change formatting here |
+| `background.js` | Wires the context menu to the converter and clipboard |
 
 ### Testing Your Changes
 
-1. **Manual Testing**
+1. **Automated Tests**
+   - `npm ci` once, then `npm test` (add a case to `test/converter.test.js` for every formatting change)
+   - `npm run lint` checks syntax, the manifest and that versions agree
+
+2. **Manual Testing**
    - Select formatted text on various websites
    - Right-click → "Copy as WhatsApp Format"
    - Paste into WhatsApp Web and verify formatting
 
-2. **Test Cases to Cover**
+3. **Test Cases to Cover**
    - Bold, italic, strikethrough, code
    - Bullet lists (single and nested)
    - Numbered lists (single and nested)
@@ -106,7 +114,7 @@ whatsapp-format-extension/
    - Mixed formatting
    - Edge cases (empty elements, whitespace)
 
-3. **Websites to Test On**
+4. **Websites to Test On**
    - Google Docs
    - Notion
    - Medium
